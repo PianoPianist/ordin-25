@@ -23,8 +23,8 @@ def load_data_temp():
     return df
 
 def main():
-    st.set_page_config(page_title="Air Quality Dashboard", layout="wide")
-    st.title("Air Quality Dashboard")
+    st.set_page_config(page_title="Ordin 25 Dashboard", layout="wide")
+    st.title("Ordin 25 Dashboard")
     st.sidebar.markdown(
         "<h1>Configuration</h1>",
         unsafe_allow_html=True
