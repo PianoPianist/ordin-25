@@ -86,7 +86,10 @@ def main():
         sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax2, cbar=True)
         st.pyplot(fig2)
         st.subheader("Missing Data Summary")
-        st.write(df_filtered.isnull().sum())
+        missing_data = df_filtered.isnull().sum().reset_index()
+        missing_data.columns = ['Name', 'Missing Values']
+
+        st.dataframe(missing_data)
 
 
         st.subheader("Pollutant Distribution")
