@@ -3,15 +3,28 @@ import pandas as pd
 import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 
 @st.cache_data
 def load_data_ap():
     df = pd.read_csv("AP001.csv", parse_dates=["From Date", "To Date"])
+    for col in df.select_dtypes(include=np.number).columns:
+        df[col].fillna(df[col].mean(), inplace=True)
+    for col in df.select_dtypes(include='object').columns:
+        df[col].fillna(df[col].mode()[0], inplace=True)
+
     return df
 
 @st.cache_data
 def load_data_city():
     df = pd.read_csv("city_day.csv", parse_dates=["Date"])
+    for col in df.select_dtypes(include=np.number).columns:
+        df[col].fillna(df[col].mean(), inplace=True)
+    for col in df.select_dtypes(include='object').columns:
+        df[col].fillna(df[col].mode()[0], inplace=True)
+    df = df[df['City'] != "Ahmedabad"]
+    df = df[df['City'] != "Guwahati"]
+    
     return df
 
 @st.cache_data
@@ -20,6 +33,10 @@ def load_data_temp():
         "GlobalLandTemperaturesByMajorCity.csv",
         parse_dates=["dt"]
     )
+    for col in df.select_dtypes(include=np.number).columns:
+        df[col].fillna(df[col].mean(), inplace=True)
+    for col in df.select_dtypes(include='object').columns:
+        df[col].fillna(df[col].mode()[0], inplace=True)
     return df
 
 def main():
@@ -221,30 +238,31 @@ def main():
         st.plotly_chart(fig_bar_country, use_container_width=True)
 
 
-        st.subheader("Latest Global Temperatures Map")
-        latest = df_temp_filt["dt"].max()
-        df_latest = df_temp_filt[
-            (df_temp_filt["dt"] == latest) &
-            (df_temp_filt["AverageTemperature"].notna())
-        ]
-        def parse_coord(x):
-            if pd.isna(x): return None
-            direction = x[-1]
-            val = float(x[:-1])
-            return val if direction in ("N","E") else -val
-        df_latest["lat"] = df_latest["Latitude"].apply(parse_coord)
-        df_latest["lon"] = df_latest["Longitude"].apply(parse_coord)
-        df_latest = df_latest.dropna(subset=["lat","lon"])
+        # st.subheader("Latest Global Temperatures Map")
+        # latest = df_temp_filt["dt"].max()
+        # df_latest = df_temp_filt[
+        #     (df_temp_filt["dt"] == latest) &
+        #     (df_temp_filt["AverageTemperature"].notna())
+        # ]
+        # def parse_coord(x):
+        #     if pd.isna(x): return None
+        #     direction = x[-1]
+        #     val = float(x[:-1])
+        #     return val if direction in ("N","E") else -val
+        # df_latest["lat"] = df_latest["Latitude"].apply(parse_coord)
+        # df_latest["lon"] = df_latest["Longitude"].apply(parse_coord)
+        # df_latest = df_latest.dropna(subset=["lat","lon"])
 
-        fig_map = px.scatter_geo(
-            df_latest,
-            lat="lat", lon="lon",
-            color="AverageTemperature",
-            hover_name="City",
-            size="AverageTemperature",
-            projection="natural earth",
-            title=f"Global Temps on {latest.date()}"
-        )
-        st.plotly_chart(fig_map, use_container_width=True)
+        # fig_map = px.scatter_geo(
+        #     df_latest,
+        #     lat="lat", lon="lon",
+        #     color="AverageTemperature",
+        #     hover_name="City",
+        #     size="AverageTemperature",
+        #     projection="natural earth",
+        #     title=f"Global Temps on {latest.date()}"
+        # )
+        # st.plotly_chart(fig_map, use_container_width=True)
+        
 if __name__ == "__main__":
     main()
